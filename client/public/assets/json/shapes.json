@@ -1,0 +1,140 @@
+{
+    "boot_1": {
+        "type": "fromPhysicsEditor",
+        "label": "boot-1",
+        "isStatic": false,
+        "density": 0.8,
+        "restitution": 0.1,
+        "friction": 0.1,
+        "frictionAir": 0.001,
+        "frictionStatic": 0.5,
+        "collisionFilter": { "mask": 8, "category": 4 },
+        "fixtures": [
+            {
+                "label": "boot-1",
+                "isSensor": false,
+                "vertices": [
+                    [
+                        { "x": 9, "y": 17 },
+                        { "x": 1, "y": 17 },
+                        { "x": 0, "y": 0 },
+                        { "x": 17, "y": 1 },
+                        { "x": 14, "y": 10 }
+                    ]
+                ]
+            }
+        ]
+    },
+    "boot_2": {
+        "type": "fromPhysicsEditor",
+        "isStatic": false,
+        "density": 0.8,
+        "restitution": 0.1,
+        "friction": 0.1,
+        "frictionAir": 0.001,
+        "frictionStatic": 0.5,
+        "collisionFilter": { "mask": 8, "category": 4 },
+        "label": "boot-2",
+        "fixtures": [
+            {
+                "label": "boot-2",
+                "isSensor": false,
+                "vertices": [
+                    [
+                        { "x": 4, "y": 11 },
+                        { "x": 2, "y": 1 },
+                        { "x": 17, "y": 0 },
+                        { "x": 18, "y": 17 },
+                        { "x": 8, "y": 18 }
+                    ]
+                ]
+            }
+        ]
+    },
+    "goal": {
+        "type": "fromPhysicsEditor",
+        "isStatic": true,
+        "density": 0.8,
+        "restitution": 0.1,
+        "friction": 0,
+        "frictionAir": 0,
+        "frictionStatic": 0,
+        "collisionFilter": { "group": 0, "category": 1, "mask": 255 },
+        "label": "goal-1",
+        "fixtures": [
+            {
+                "label": "goal-1",
+                "isSensor": false,
+                "vertices": [
+                    [
+                        { "x": 73, "y": 41 },
+                        { "x": 81, "y": 40 },
+                        { "x": 81, "y": 45 }
+                    ],
+                    [
+                        { "x": 15, "y": 42 },
+                        { "x": 41, "y": 41 },
+                        { "x": 73, "y": 41 },
+                        { "x": 81, "y": 45 },
+                        { "x": 18, "y": 46 }
+                    ],
+                    [
+                        { "x": 10, "y": 47 },
+                        { "x": 15, "y": 42 },
+                        { "x": 18, "y": 46 },
+                        { "x": 14, "y": 50 }
+                    ],
+                    [
+                        { "x": 14, "y": 50 },
+                        { "x": 5, "y": 163 },
+                        { "x": 0, "y": 163 },
+                        { "x": 10, "y": 47 }
+                    ]
+                ]
+            }
+        ]
+    },
+    "goal_2": {
+        "type": "fromPhysicsEditor",
+        "isStatic": true,
+        "density": 0.8,
+        "restitution": 0.1,
+        "friction": 0.1,
+        "frictionAir": 0.001,
+        "frictionStatic": 0.5,
+        "collisionFilter": { "group": 0, "category": 1, "mask": 255 },
+        "label": "goal-2",
+        "fixtures": [
+            {
+                "label": "goal-2",
+                "isSensor": false,
+                "vertices": [
+                    [
+                        { "x": 7, "y": 45 },
+                        { "x": 0, "y": 45 },
+                        { "x": 0, "y": 40 },
+                        { "x": 7, "y": 41 }
+                    ],
+                    [
+                        { "x": 72, "y": 50 },
+                        { "x": 81, "y": 163 },
+                        { "x": 76, "y": 163 },
+                        { "x": 67, "y": 49 }
+                    ],
+                    [
+                        { "x": 66, "y": 42 },
+                        { "x": 72, "y": 50 },
+                        { "x": 67, "y": 49 },
+                        { "x": 63, "y": 45 }
+                    ],
+                    [
+                        { "x": 63, "y": 45 },
+                        { "x": 7, "y": 45 },
+                        { "x": 7, "y": 41 },
+                        { "x": 66, "y": 42 }
+                    ]
+                ]
+            }
+        ]
+    }
+}

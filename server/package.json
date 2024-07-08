@@ -1,0 +1,41 @@
+{
+  "name": "footyhead-server",
+  "description": "Footyhead Server",
+  "version": "1.0.0",
+  "author": "Ahmad Zaidi",
+  "license": "ISC",
+  "engines": {
+    "node": ">= 16.13.0"
+  },
+  "scripts": {
+    "start-server": "tsx watch src/index.ts",
+    "loadtest": "tsx loadtest/example.ts --room game_room --numClients 2",
+    "build": "npm run clean && tsc",
+    "clean": "rimraf build",
+    "clean-db": "rimraf db/*.db*",
+    "test": "mocha -r tsx test/**_test.ts --exit --timeout 15000",
+    "schema-codegen": "schema-codegen src/rooms/schema/* --ts --output client-side/"
+  },
+  "devDependencies": {
+    "@colyseus/loadtest": "^0.15.0",
+    "@colyseus/testing": "^0.15.0",
+    "@types/better-sqlite3": "^7.6.11",
+    "@types/express": "^4.17.1",
+    "@types/matter-js": "^0.19.6",
+    "@types/mocha": "^10.0.1",
+    "mocha": "^10.2.0",
+    "rimraf": "^5.0.0",
+    "tsx": "^4.10.2",
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "@colyseus/monitor": "^0.15.0",
+    "@colyseus/playground": "^0.15.3",
+    "@colyseus/tools": "^0.15.0",
+    "better-sqlite3": "^11.1.2",
+    "colyseus": "^0.15.0",
+    "cron": "^3.1.7",
+    "express": "^4.18.2",
+    "matter-js": "^0.20.0"
+  }
+}
