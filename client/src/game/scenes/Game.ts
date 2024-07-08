@@ -160,12 +160,12 @@ export class Game extends Scene {
 
         // Dead ball
         if (labelA == "goal-sensor-top-1" || labelB == "goal-sensor-top-1") {
-          this.ball.setVelocityX(1.5);
+          this.ball.setVelocity(4, -4);
         } else if (
           labelA == "goal-sensor-top-2" ||
           labelB == "goal-sensor-top-2"
         ) {
-          this.ball.setVelocityX(-1.5);
+          this.ball.setVelocity(-4, -4);
         }
         this.sound.play("ball-touch");
       }

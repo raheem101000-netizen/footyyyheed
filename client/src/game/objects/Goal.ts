@@ -27,6 +27,7 @@ export class Goal extends Phaser.Physics.Matter.Image {
 
         this.setStatic(true);
         this.setFriction(0);
+        this.setBounce(1)
         this.setFlipX(playerNumber == PlayerNumber.Two);
 
         this.sensor = world.scene.matter.add.rectangle(

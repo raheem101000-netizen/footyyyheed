@@ -46,12 +46,12 @@ export class GameRoom extends Room<GameState> {
     const goalOne = Bodies.rectangle(40, 465, 80, 5, {
       isStatic: true,
       angle: 0.05,
-      restitution: 0.4,
+      restitution: 1,
     });
     const goalTwo = Bodies.rectangle(984, 465, 80, 5, {
       isStatic: true,
       angle: -0.05,
-      restitution: 0.4,
+      restitution: 1,
     });
     this.playerOne = Bodies.circle(200, 500, 22, {
       mass: 20,
@@ -87,9 +87,9 @@ export class GameRoom extends Room<GameState> {
       const goalTwoTop = Collision.collides(goalTwo, this.ball);
 
       if (goalOneTop?.collided) {
-        Body.setVelocity(this.ball, { x: 1.5, y: this.ball.velocity.y });
+        Body.setVelocity(this.ball, { x: 4, y: -4 });
       } else if (goalTwoTop?.collided) {
-        Body.setVelocity(this.ball, { x: -1.5, y: this.ball.velocity.y });
+        Body.setVelocity(this.ball, { x: -4, y: -4 });
       }
 
       this.state.ball.x = this.ball.position.x;
