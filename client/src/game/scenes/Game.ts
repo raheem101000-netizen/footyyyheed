@@ -91,6 +91,7 @@ export class Game extends Scene {
         }
       );
       this.players[sessionId] = player;
+      player.boot.setData("lastKicked", -1);
 
       playerState.onChange(() => {
         // Cache updated coordinates for processing
@@ -108,7 +109,7 @@ export class Game extends Scene {
     this.room.state.players.onRemove((_: any, sessionId: string) => {
       const player = this.players[sessionId];
       if (player) {
-        player.destroy(this.matter.world);
+        player.destroy();
         delete this.players[sessionId];
       }
     });
@@ -220,7 +221,6 @@ export class Game extends Scene {
       }
       this.interpolatePlayer(player);
     }
-
     this.interpolateBall();
   }
 
@@ -229,6 +229,7 @@ export class Game extends Scene {
       player.body.data.values;
 
     if (serverKick) {
+      this.events.emit(`kick-${player.team}`);
       player.boot.setVelocityX(player.team == PlayerNumber.One ? -15 : 15);
     }
 

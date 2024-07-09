@@ -128,7 +128,7 @@ export class GameRoom extends Room<GameState> {
       player.kick = true;
       this.clock.setTimeout(() => {
         player.kick = false;
-      }, 75);
+      }, 200);
     });
 
     this.onMessage("kick", (client) => {

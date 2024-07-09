@@ -8,16 +8,19 @@ const playerPosX = { 1: 200, 2: 824 };
 export class Player {
   body: Phaser.Physics.Matter.Image;
   boot: Phaser.Physics.Matter.Image;
-  isGrounded: boolean;
-  constraintA: MatterJS.ConstraintType;
-  constraintB: MatterJS.ConstraintType;
   team: PlayerNumber;
+  isGrounded: boolean;
+  #bootConstraint: MatterJS.ConstraintType | null;
+
   constructor(
     world: Phaser.Physics.Matter.World,
     team: PlayerNumber,
     playerOptions?: Phaser.Types.Physics.Matter.MatterBodyConfig,
     bootOptions?: Phaser.Types.Physics.Matter.MatterBodyConfig
   ) {
+    this.team = team;
+    this.isGrounded = false;
+
     this.body = new Phaser.Physics.Matter.Image(
       world,
       playerPosX[team],
@@ -32,7 +35,7 @@ export class Player {
     this.body.setMass(20);
     this.body.setBounce(0.3);
     this.body.setFixedRotation();
-    this.body.setFlipX(team == PlayerNumber.Two);
+    this.body.setFlipX(team === PlayerNumber.Two);
     this.body.setCollisionCategory(categoryPlayer);
     this.body.setCollidesWith(
       categoryFootball | categoryPlatform | categoryPlayer
@@ -50,48 +53,57 @@ export class Player {
         label: `boot-${team}`,
       }
     );
-    this.boot.setRotation(team == PlayerNumber.One ? -1.3 : 1.3);
+    this.boot.setMass(1);
+    this.boot.setRotation(team === PlayerNumber.One ? -1.3 : 1.3);
     this.boot.setFixedRotation();
     world.scene.add.existing(this.boot);
 
     // Add joints between boot and body
-    if (team == PlayerNumber.One) {
-      this.constraintA = this.body.scene.matter.add.constraint(
+    this.body.scene.matter.add.constraint(
+      this.body.body as BodyType,
+      this.boot.body as BodyType,
+      30,
+      0.2,
+      { pointA: { x: 0, y: 0 }, label: `body-${team}-centerConstraint` }
+    );
+    this.#setBootConstraint();
+
+    // Kick Animation Handling
+    this.body.scene.events.on(`kick-${team}`, () => {
+      this.#bootConstraint && world.removeConstraint(this.#bootConstraint);
+      this.#bootConstraint = null;
+      world.scene.time.delayedCall(200, () => {
+        this.#setBootConstraint();
+      });
+    });
+  }
+
+  #setBootConstraint() {
+    if (!this.#bootConstraint) {
+      this.#bootConstraint = this.body.scene.matter.add.constraint(
         this.body.body as BodyType,
         this.boot.body as BodyType,
-        7,
-        0.2,
-        { pointA: { x: 5, y: 20 } }
-      );
-      this.constraintB = this.body.scene.matter.add.constraint(
-        this.body.body as BodyType,
-        this.boot.body as BodyType,
-        30,
+        0,
         0.8,
-        { pointA: { x: -15, y: 10 } }
-      );
-    } else if (team == PlayerNumber.Two) {
-      this.constraintA = this.body.scene.matter.add.constraint(
-        this.body.body as BodyType,
-        this.boot.body as BodyType,
-        30,
-        0.8,
-        { pointA: { x: 15, y: 10 } }
-      );
-      this.constraintB = this.body.scene.matter.add.constraint(
-        this.body.body as BodyType,
-        this.boot.body as BodyType,
-        7,
-        0.2,
-        { pointA: { x: -5, y: 20 } }
+        {
+          pointA: { x: this.team === PlayerNumber.One ? -15 : 15, y: 25 },
+          label: `body-${this.team}-bootConstraint`,
+        }
       );
     }
-    this.isGrounded = false;
-    this.team = team;
   }
-  destroy(world: Phaser.Physics.Matter.World) {
+
+  destroy() {
     this.body.destroy();
     this.boot.destroy();
-    world.removeConstraint([this.constraintA, this.constraintB]);
+    this.body.removeAllListeners();
+    this.boot.world.getAllConstraints().forEach((c) => {
+      if (
+        c.label === `body-${this.team}-centerConstraint` ||
+        c.label === `body-${this.team}-bootConstraint`
+      ) {
+        this.boot.world.removeConstraint(c);
+      }
+    });
   }
 }
