@@ -131,21 +131,45 @@ export class GameRoom extends Room<GameState> {
       }, 200);
     });
 
-    this.onMessage("kick", (client) => {
+    this.onMessage("kick", (client, data) => {
       const player = this.state.players.get(client.sessionId);
       switch (player.team) {
         case 1:
-          Body.setVelocity(this.ball, {
-            x: this.ball.velocity.x + 5,
-            y: this.ball.velocity.y - 8,
-          });
+          if (data.modifier == 0) {
+            Body.setVelocity(this.ball, {
+              x: this.ball.velocity.x + 0,
+              y: this.ball.velocity.y - 9,
+            });
+          } else if (data.modifier == 1) {
+            Body.setVelocity(this.ball, {
+              x: this.ball.velocity.x + 3,
+              y: this.ball.velocity.y - 7,
+            });
+          } else {
+            Body.setVelocity(this.ball, {
+              x: this.ball.velocity.x + 5,
+              y: this.ball.velocity.y - 8,
+            });
+          }
           Body.setAngularVelocity(this.ball, this.ball.angularVelocity + 0.5);
           break;
         case 2:
-          Body.setVelocity(this.ball, {
-            x: this.ball.velocity.x - 5,
-            y: this.ball.velocity.y - 8,
-          });
+          if (data.modifier == 0) {
+            Body.setVelocity(this.ball, {
+              x: this.ball.velocity.x + 0,
+              y: this.ball.velocity.y - 9,
+            });
+          } else if (data.modifier == 1) {
+            Body.setVelocity(this.ball, {
+              x: this.ball.velocity.x - 3,
+              y: this.ball.velocity.y - 7,
+            });
+          } else {
+            Body.setVelocity(this.ball, {
+              x: this.ball.velocity.x - 5,
+              y: this.ball.velocity.y - 8,
+            });
+          }
           Body.setAngularVelocity(this.ball, this.ball.angularVelocity - 0.5);
       }
     });

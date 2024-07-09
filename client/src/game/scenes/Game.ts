@@ -118,24 +118,62 @@ export class Game extends Scene {
     this.ball.setOnCollide(
       ({
         bodyA: { label: labelA },
-        bodyB: { label: labelB },
+        bodyB: { label: labelB, gameObject: gameObjectB },
       }: Phaser.Types.Physics.Matter.MatterCollisionData) => {
         // Collides with boot
-        if (space.isDown && (labelA == "boot-1" || labelB == "boot-1")) {
-          this.ball.setVelocity(
-            this.ball.getVelocity().x + 5,
-            this.ball.getVelocity().y + -8
-          );
-          this.ball.setAngularVelocity(this.ball.getAngularVelocity() + 0.5);
-          this.room.send("kick");
-        } else if (space.isDown && (labelA == "boot-2" || labelB == "boot-2")) {
-          if (space.isDown) {
-            this.ball.setVelocity(
-              this.ball.getVelocity().x + -5,
-              this.ball.getVelocity().y + -8
-            );
-            this.room.send("kick");
-            this.ball.setAngularVelocity(this.ball.getAngularVelocity() - 0.5);
+        if (labelA == "boot-1" || labelB == "boot-1") {
+          const { lastKicked } = gameObjectB.data.values;
+          if (this.time.now - lastKicked <= 25) {
+            const keyDownTime = (space.duration || space.getDuration()) / 2;
+            if (keyDownTime < 50) {
+              this.ball.setVelocity(
+                this.ball.getVelocity().x + 0,
+                this.ball.getVelocity().y - 9
+              );
+              this.room.send("kick", { modifier: 0 });
+            } else if (keyDownTime < 75) {
+              this.ball.setVelocity(
+                this.ball.getVelocity().x + 3,
+                this.ball.getVelocity().y - 7
+              );
+              this.room.send("kick", { modifier: 1 });
+            } else {
+              this.ball.setVelocity(
+                this.ball.getVelocity().x + 5,
+                this.ball.getVelocity().y - 8
+              );
+              this.room.send("kick", { modifier: 2 });
+            }
+            this.ball.setAngularVelocity(this.ball.getAngularVelocity() + 0.5);
+          } else {
+            this.ball.setVelocityX(2);
+          }
+        } else if (labelA == "boot-2" || labelB == "boot-2") {
+          const { lastKicked } = gameObjectB.data.values;
+          if (this.time.now - lastKicked <= 25) {
+            const keyDownTime = (space.duration || space.getDuration()) / 2;
+            if (keyDownTime < 50) {
+              this.ball.setVelocity(
+                this.ball.getVelocity().x + 0,
+                this.ball.getVelocity().y - 9
+              );
+              this.room.send("kick", { modifier: 0 });
+            } else if (keyDownTime < 75) {
+              this.ball.setVelocity(
+                this.ball.getVelocity().x - 3,
+                this.ball.getVelocity().y - 7
+              );
+              this.room.send("kick", { modifier: 1 });
+            } else {
+              this.ball.setVelocity(
+                this.ball.getVelocity().x - 5,
+                this.ball.getVelocity().y - 8
+              );
+              this.room.send("kick", { modifier: 2 });
+            }
+            this.ball.setAngularVelocity(this.ball.getAngularVelocity() + 0.5);
+          } else {
+            this.ball.setVelocityX(-2);
           }
         }
         // Collides with player
@@ -230,7 +268,8 @@ export class Game extends Scene {
 
     if (serverKick) {
       this.events.emit(`kick-${player.team}`);
-      player.boot.setVelocityX(player.team == PlayerNumber.One ? -15 : 15);
+      player.boot.setData("lastKicked", this.time.now);
+      player.boot.setVelocity(player.team === PlayerNumber.One ? 10 : -10, -5);
     }
 
     player.body.setPosition(
