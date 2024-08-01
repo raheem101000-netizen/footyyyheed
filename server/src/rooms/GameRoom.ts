@@ -46,12 +46,12 @@ export class GameRoom extends Room<GameState> {
     const goalOne = Bodies.rectangle(40, 465, 80, 5, {
       isStatic: true,
       angle: 0.05,
-      restitution: 0.4,
+      restitution: 1,
     });
     const goalTwo = Bodies.rectangle(984, 465, 80, 5, {
       isStatic: true,
       angle: -0.05,
-      restitution: 0.4,
+      restitution: 1,
     });
     this.playerOne = Bodies.circle(200, 500, 22, {
       mass: 20,
@@ -87,9 +87,9 @@ export class GameRoom extends Room<GameState> {
       const goalTwoTop = Collision.collides(goalTwo, this.ball);
 
       if (goalOneTop?.collided) {
-        Body.setVelocity(this.ball, { x: 1.5, y: this.ball.velocity.y });
+        Body.setVelocity(this.ball, { x: 4, y: -4 });
       } else if (goalTwoTop?.collided) {
-        Body.setVelocity(this.ball, { x: -1.5, y: this.ball.velocity.y });
+        Body.setVelocity(this.ball, { x: -4, y: -4 });
       }
 
       this.state.ball.x = this.ball.position.x;
@@ -128,24 +128,48 @@ export class GameRoom extends Room<GameState> {
       player.kick = true;
       this.clock.setTimeout(() => {
         player.kick = false;
-      }, 75);
+      }, 200);
     });
 
-    this.onMessage("kick", (client) => {
+    this.onMessage("kick", (client, data) => {
       const player = this.state.players.get(client.sessionId);
       switch (player.team) {
         case 1:
-          Body.setVelocity(this.ball, {
-            x: this.ball.velocity.x + 5,
-            y: this.ball.velocity.y - 8,
-          });
+          if (data.modifier == 0) {
+            Body.setVelocity(this.ball, {
+              x: this.ball.velocity.x + 0,
+              y: this.ball.velocity.y - 9,
+            });
+          } else if (data.modifier == 1) {
+            Body.setVelocity(this.ball, {
+              x: this.ball.velocity.x + 3,
+              y: this.ball.velocity.y - 7,
+            });
+          } else {
+            Body.setVelocity(this.ball, {
+              x: this.ball.velocity.x + 5,
+              y: this.ball.velocity.y - 8,
+            });
+          }
           Body.setAngularVelocity(this.ball, this.ball.angularVelocity + 0.5);
           break;
         case 2:
-          Body.setVelocity(this.ball, {
-            x: this.ball.velocity.x - 5,
-            y: this.ball.velocity.y - 8,
-          });
+          if (data.modifier == 0) {
+            Body.setVelocity(this.ball, {
+              x: this.ball.velocity.x + 0,
+              y: this.ball.velocity.y - 9,
+            });
+          } else if (data.modifier == 1) {
+            Body.setVelocity(this.ball, {
+              x: this.ball.velocity.x - 3,
+              y: this.ball.velocity.y - 7,
+            });
+          } else {
+            Body.setVelocity(this.ball, {
+              x: this.ball.velocity.x - 5,
+              y: this.ball.velocity.y - 8,
+            });
+          }
           Body.setAngularVelocity(this.ball, this.ball.angularVelocity - 0.5);
       }
     });
