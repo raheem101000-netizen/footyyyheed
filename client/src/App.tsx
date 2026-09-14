@@ -4,9 +4,7 @@ import { Cloud } from "./layout";
 import ErrorPage from "./error-page";
 import Home from "./routes/home";
 import Game from "./routes/game";
-import Play from "./routes/play";
-import { action as playAction } from "./actions/play";
-import { loader as gameLoader } from "./loaders/game";
+import Rooms from "./routes/play";
 
 function App() {
   const router = createBrowserRouter([
@@ -17,13 +15,11 @@ function App() {
     },
     {
       path: "/play",
-      action: playAction,
-      element: <Play />,
+      element: <Rooms />,
       errorElement: <ErrorPage />,
     },
     {
-      path: "/play/:pin",
-      loader: gameLoader,
+      path: "/play/:roomId",
       element: <Game />,
       errorElement: <ErrorPage />,
     },

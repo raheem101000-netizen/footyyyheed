@@ -6,12 +6,14 @@ export function Title(props: React.PropsWithChildren) {
   return <div className="title honk-font">{props.children}</div>;
 }
 
-export function Button(props: React.PropsWithChildren<{ className?: string }>) {
+export function Button(
+  props: React.PropsWithChildren<React.ButtonHTMLAttributes<HTMLButtonElement>>
+) {
   return (
     <button
       type="submit"
-      className={`button--pandora honk-font ${props?.className ?? ""}`}
       {...props}
+      className={`button--pandora honk-font ${props?.className ?? ""}`}
     >
       <span>{props.children}</span>
     </button>

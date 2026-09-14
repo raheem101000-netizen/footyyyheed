@@ -16,7 +16,7 @@ export class Game extends Scene {
   ball: Ball;
   room: Room;
   roomData: any;
-  client = new ColyseusClient("http://192.168.0.201:2567");
+  client = new ColyseusClient("http://localhost:2567");
 
   constructor() {
     super("Game");

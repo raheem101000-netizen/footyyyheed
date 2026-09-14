@@ -1,13 +1,15 @@
 import { useRef } from "react";
 import { IRefPhaserGame, PhaserGame } from "../game/PhaserGame";
-import { useBlocker, useLoaderData, useParams } from "react-router-dom";
+import { useBlocker, useLocation, useParams } from "react-router-dom";
 import { EventBus } from "../game/EventBus";
 
 export function Game() {
   //  References to the PhaserGame component (game and scene are exposed)
   const phaserRef = useRef<IRefPhaserGame | null>(null);
-  const { pin } = useParams();
-  const { roomId } = useLoaderData() as { roomId: string };
+  const { roomId } = useParams();
+  // `pin` arrives via router state from the lobby's room:game:start handoff
+  // (RoomLobby generates it and passes it along with the roomId).
+  const { pin } = (useLocation().state as { pin: string }) || {};
 
   // Block navigating elsewhere when data has been entered into the input
   const blocker = useBlocker(

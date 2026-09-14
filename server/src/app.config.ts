@@ -1,30 +1,13 @@
-import crypto from "crypto";
 import config from "@colyseus/tools";
+import { LobbyRoom } from "colyseus";
 import { monitor } from "@colyseus/monitor";
 import { playground } from "@colyseus/playground";
-
-import db from "../db/init";
-import { clearStalePINs } from "./cron";
 
 /**
  * Import your Room files
  */
 import { GameRoom } from "./rooms/GameRoom";
-import { matchMaker } from "colyseus";
-
-function generateRandomPassphrase(length: number) {
-  const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  const charsLength = chars.length;
-  let passphrase = "";
-
-  // Generate random bytes
-  crypto.randomBytes(length).forEach((byte) => {
-    const randomIdx = byte % charsLength;
-    passphrase += chars[randomIdx];
-  });
-
-  return passphrase;
-}
+import { RoomLobby } from "./rooms/RoomLobby";
 
 export default config({
   initializeGameServer: (gameServer) => {
@@ -34,6 +17,14 @@ export default config({
     if (process.env.NODE_ENV !== "production") {
       // gameServer.simulateLatency(200);
     }
+    // Built-in LobbyRoom: auto-broadcasts room list changes to anyone
+    // watching (used by the client's room browser).
+    gameServer.define("lobby", LobbyRoom);
+    // RoomLobby: one instance per game lobby (create/join/ready/launch).
+    // enableRealtimeListing() pushes +/- events into the LobbyRoom feed
+    // whenever a lobby is created/updated/removed.
+    gameServer.define("room_lobby", RoomLobby).enableRealtimeListing();
+    // The actual head-football match, launched by RoomLobby via matchMaker.
     gameServer.define("game_room", GameRoom).filterBy(["pin"]);
   },
 
@@ -43,32 +34,6 @@ export default config({
      * Bind your custom express routes here:
      * Read more: https://expressjs.com/en/starter/basic-routing.html
      */
-
-    clearStalePINs.start();
-
-    app.get("/play", async (req, res) => {
-      const pin = generateRandomPassphrase(6);
-      const room = await matchMaker.createRoom("game_room", { pin: pin });
-
-      db.prepare("INSERT INTO game (pin, roomId, active) VALUES (?, ?, 0)").run(
-        pin,
-        room.roomId
-      );
-
-      res.send({ pin });
-    });
-
-    app.get("/play/:pin", async (req, res) => {
-      const row = db
-        .prepare("SELECT * FROM game WHERE pin = ?")
-        .get(req.params.pin) as { pin: string; roomId: string; active: number };
-
-      if (!row || row.active >= 2 || req.params.pin !== row.pin) {
-        res.sendStatus(404);
-        return;
-      }
-      res.send({ pin: req.params.pin, roomId: row.roomId });
-    });
 
     /**
      * Use @colyseus/playground
