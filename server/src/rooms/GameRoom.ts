@@ -12,6 +12,14 @@ import {
 } from "matter-js";
 import db from "../../db/init";
 
+// Kick tuning: scripted-velocity arc kick (no boot bodies/constraints).
+const ARC_FWD = [9, 13, 17, 22]; // forward power per tier: tap/short/long/max
+// Game gravity (0.7) is ~half the tester's (1.3), so for the same "up" the
+// ball floats ~2x higher/longer here. Starting point: roughly halve the
+// lift (0.6 -> 0.3) to compensate; fine-tune from the [kick] debug logs.
+const ARC_HEIGHT = 0.3; // up = forward * this
+const RUN_BONUS = 0.6; // fraction of player's run speed added to forward
+
 /**
  * Footyhead Game Room. First client that joins is designated host
  * and their sessionId is set to `hostId`
@@ -132,46 +140,33 @@ export class GameRoom extends Room<GameState> {
     });
 
     this.onMessage("kick", (client, data) => {
-      const player = this.state.players.get(client.sessionId);
-      switch (player.team) {
-        case 1:
-          if (data.modifier == 0) {
-            Body.setVelocity(this.ball, {
-              x: this.ball.velocity.x + 0,
-              y: this.ball.velocity.y - 9,
-            });
-          } else if (data.modifier == 1) {
-            Body.setVelocity(this.ball, {
-              x: this.ball.velocity.x + 3,
-              y: this.ball.velocity.y - 7,
-            });
-          } else {
-            Body.setVelocity(this.ball, {
-              x: this.ball.velocity.x + 5,
-              y: this.ball.velocity.y - 8,
-            });
-          }
-          Body.setAngularVelocity(this.ball, this.ball.angularVelocity + 0.5);
-          break;
-        case 2:
-          if (data.modifier == 0) {
-            Body.setVelocity(this.ball, {
-              x: this.ball.velocity.x + 0,
-              y: this.ball.velocity.y - 9,
-            });
-          } else if (data.modifier == 1) {
-            Body.setVelocity(this.ball, {
-              x: this.ball.velocity.x - 3,
-              y: this.ball.velocity.y - 7,
-            });
-          } else {
-            Body.setVelocity(this.ball, {
-              x: this.ball.velocity.x - 5,
-              y: this.ball.velocity.y - 8,
-            });
-          }
-          Body.setAngularVelocity(this.ball, this.ball.angularVelocity - 0.5);
-      }
+      const playerState = this.state.players.get(client.sessionId);
+      const playerBody =
+        client.sessionId == this.hostId ? this.playerOne : this.playerTwo;
+
+      const tier = Math.max(0, Math.min(3, data.modifier));
+      const dir = playerState.team === 1 ? 1 : -1; // p1 kicks right, p2 kicks left
+      const runSpeed = Math.max(0, playerBody.velocity.x * dir); // only forward run counts
+      const fwd = ARC_FWD[tier] + runSpeed * RUN_BONUS;
+      const up = Math.min(fwd * ARC_HEIGHT, fwd * 0.85); // capped so forward always dominates
+
+      // TEMP DEBUG - remove once the arc kick is confirmed live in-game.
+      console.log(
+        `[kick] team=${playerState.team} tier=${tier} runSpeed=${runSpeed.toFixed(
+          2
+        )} fwd=${fwd.toFixed(2)} up=${up.toFixed(2)} dir=${dir}`
+      );
+
+      // Set (not add) so the kick is deterministic regardless of the ball's
+      // current velocity - matches the tuned tester exactly.
+      Body.setVelocity(this.ball, {
+        x: fwd * dir,
+        y: -up,
+      });
+      Body.setAngularVelocity(
+        this.ball,
+        this.ball.angularVelocity + 0.4 * dir
+      );
     });
 
     this.onMessage("goal", (_, player: 1 | 2) => {

@@ -50,6 +50,15 @@ export class Game extends Scene {
       console.error(e);
     }
 
+    // Charge tier must reflect the FULL hold, so we only trigger the kick
+    // swing on key release (space.duration is frozen to the complete
+    // down->up span at that point) - not on key down, which used to start
+    // the boot swinging almost immediately and let it collide with the
+    // ball well before a longer hold could ever be measured.
+    space.on("up", () => {
+      this.room.send("startKick");
+    });
+
     this.scoreText = this.add
       .text(512, 175, "0 : 0", {
         fontFamily: "Arial Black",
@@ -124,54 +133,38 @@ export class Game extends Scene {
         if (labelA == "boot-1" || labelB == "boot-1") {
           const { lastKicked } = gameObjectB.data.values;
           if (this.time.now - lastKicked <= 25) {
+            // Ball velocity/spin on kick is applied server-side only (the
+            // arc kick) so there's a single source of truth for the kick -
+            // the client just reports which charge tier was held.
             const keyDownTime = (space.duration || space.getDuration()) / 2;
-            if (keyDownTime < 50) {
-              this.ball.setVelocity(
-                this.ball.getVelocity().x + 0,
-                this.ball.getVelocity().y - 9
-              );
-              this.room.send("kick", { modifier: 0 });
-            } else if (keyDownTime < 75) {
-              this.ball.setVelocity(
-                this.ball.getVelocity().x + 3,
-                this.ball.getVelocity().y - 7
-              );
-              this.room.send("kick", { modifier: 1 });
-            } else {
-              this.ball.setVelocity(
-                this.ball.getVelocity().x + 5,
-                this.ball.getVelocity().y - 8
-              );
-              this.room.send("kick", { modifier: 2 });
+            let modifier = 3;
+            if (keyDownTime < 120) {
+              modifier = 0;
+            } else if (keyDownTime < 300) {
+              modifier = 1;
+            } else if (keyDownTime < 550) {
+              modifier = 2;
             }
-            this.ball.setAngularVelocity(this.ball.getAngularVelocity() + 0.5);
+            this.room.send("kick", { modifier });
           } else {
             this.ball.setVelocityX(2);
           }
         } else if (labelA == "boot-2" || labelB == "boot-2") {
           const { lastKicked } = gameObjectB.data.values;
           if (this.time.now - lastKicked <= 25) {
+            // Ball velocity/spin on kick is applied server-side only (the
+            // arc kick) so there's a single source of truth for the kick -
+            // the client just reports which charge tier was held.
             const keyDownTime = (space.duration || space.getDuration()) / 2;
-            if (keyDownTime < 50) {
-              this.ball.setVelocity(
-                this.ball.getVelocity().x + 0,
-                this.ball.getVelocity().y - 9
-              );
-              this.room.send("kick", { modifier: 0 });
-            } else if (keyDownTime < 75) {
-              this.ball.setVelocity(
-                this.ball.getVelocity().x - 3,
-                this.ball.getVelocity().y - 7
-              );
-              this.room.send("kick", { modifier: 1 });
-            } else {
-              this.ball.setVelocity(
-                this.ball.getVelocity().x - 5,
-                this.ball.getVelocity().y - 8
-              );
-              this.room.send("kick", { modifier: 2 });
+            let modifier = 3;
+            if (keyDownTime < 120) {
+              modifier = 0;
+            } else if (keyDownTime < 300) {
+              modifier = 1;
+            } else if (keyDownTime < 550) {
+              modifier = 2;
             }
-            this.ball.setAngularVelocity(this.ball.getAngularVelocity() + 0.5);
+            this.room.send("kick", { modifier });
           } else {
             this.ball.setVelocityX(-2);
           }
@@ -231,7 +224,7 @@ export class Game extends Scene {
 
   update(time: number, _delta: number) {
     if (!this.room) return;
-    const { W, A, D, space } = this.cursors;
+    const { W, A, D } = this.cursors;
 
     if (A.isDown) {
       this.ball.setVelocityModifier({
@@ -253,9 +246,6 @@ export class Game extends Scene {
         this.room.send("move", { direction: "up" });
         this.sound.play("jump");
         player.isGrounded = false;
-      }
-      if (space.isDown && space.getDuration() < 75) {
-        this.room.send("startKick");
       }
       this.interpolatePlayer(player);
     }
