@@ -1,7 +1,6 @@
 import config from "@colyseus/tools";
 import { LobbyRoom } from "colyseus";
 import { monitor } from "@colyseus/monitor";
-import { playground } from "@colyseus/playground";
 
 /**
  * Import your Room files
@@ -34,14 +33,6 @@ export default config({
      * Bind your custom express routes here:
      * Read more: https://expressjs.com/en/starter/basic-routing.html
      */
-
-    /**
-     * Use @colyseus/playground
-     * (It is not recommended to expose this route in a production environment)
-     */
-    if (process.env.NODE_ENV !== "production") {
-      app.use("/", playground);
-    }
 
     /**
      * Use @colyseus/monitor
